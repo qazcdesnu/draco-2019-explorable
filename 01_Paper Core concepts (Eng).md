@@ -346,39 +346,7 @@ reference [36] in the paper).
 | **Pairwise** | **Two items** | Zero if the pair is ordered correctly, a penalty otherwise | **RankSVM**, RankNet |
 | Listwise | Whole list | Quality of the full ranking (e.g. NDCG) | ListNet, LambdaMART |
 
-Draco uses **pairwise** RankSVM.
-
-### Formulation in Draco
-
-1. **Feature vector:** run Clingo on visualization v and count
-   violations of each soft constraint:
-   `x(v) = [n_p1(v), ..., n_pk(v)]`
-2. **Linear cost model:** `Cost(v) = wᵀx(v)`; lower cost is preferred.
-3. **Pairwise comparison:**
-   `f(v1, v2) = Cost(v1) − Cost(v2) = wᵀ(x1 − x2)`, which turns ranking
-   into **binary classification on the difference vector (x1 − x2)**.
-4. **Label:** y = −1 if v1 is preferred, otherwise y = +1.
-5. **RankSVM loss (hinge + L2):**
-   `L = (1/n) Σ max(0, 1 − yᵢ wᵀ(xᵢ1 − xᵢ2)) + λ‖w‖²`, with λ = 0.1.
-   - When v1 is preferred (y = −1), the loss is zero only if
-     `Cost(v1) ≤ Cost(v2) − 1`: the preferred chart must be cheaper by
-     a **margin of at least 1**.
-   - The L2 term keeps weights from growing too large (overfitting).
-6. **Symmetry:** (v1, v2; y) equals (v2, v1; −y), so every pair can be
-   standardized to (preferred, other; −1) without class imbalance.
-
-### Toy example
-
-Assume only two soft constraints:
-- p1: a nominal field uses color.
-- p2: a nominal field uses size.
-
-An experiment shows chart A (nominal → color) is significantly more
-accurate than chart B (nominal → size).
-- x_A = [1, 0], x_B = [0, 1], so d = x_A − x_B = [1, −1].
-- Zero loss requires `wᵀd = w1 − w2 ≤ −1`, i.e. **w2 ≥ w1 + 1**.
-- The model learns that putting a nominal field on size should cost
-  more than putting it on color, with no human tuning of weights.
+Draco uses **pairwise** RankSVM. Its formulation and an example are in section 6.
 
 ### From experimental data to ranked pairs (§6.3.1)
 
@@ -414,7 +382,124 @@ accurate than chart B (nominal → size).
 to rank sets those weights from experimental data. Because cost is a
 linear function of the feature vector, the two fit together cleanly.
 
-## 6. Preparing for questions after the talk: Vega-Lite and ASP
+## 6. RankSVM
+
+**Definition:** RankSVM is a pairwise learning-to-rank method that
+applies a support vector machine (SVM) to pairwise comparisons (Herbrich
+et al., 1999; reference [27] in the paper). All soft-constraint weights
+in Draco-Learn are learned with it (§5, §6.3).
+
+### Why it matters
+
+- One of the paper's two contributions, "a method to learn weights for
+  soft constraints from experimental data" (Abstract), is this step.
+- The difference between Draco-CQL (hand-tuned weights) and Draco-Learn
+  (learned weights), 93% vs. 65% test-pair accuracy and the task-specific
+  recommendations in Fig. 8, comes from it (§6.3).
+- The learned w becomes the ASP soft-constraint weights directly.
+  Inference (ASP) and learning (RankSVM) share one linear cost model.
+
+### SVM basics [background, outside the paper]
+
+- A linear SVM finds the separating hyperplane with the largest margin to
+  the data on both sides.
+- **Hinge loss** `max(0, 1 − y·s)`: zero if the score s is on the correct
+  side by at least 1, otherwise a penalty for the shortfall. A correct
+  side with a margin below 1 is still penalized.
+- **L2 term** `λ‖w‖²`: keeps w small, which is equivalent to widening the
+  margin and reduces overfitting. Larger λ gives smaller, smoother
+  weights; smaller λ fits the training data more closely.
+- Only pairs near the boundary or misclassified (support vectors) move
+  the solution; pairs already ranked with room to spare do not.
+
+### Turning ranking into classification (§5)
+
+1. **Feature vector:** run Clingo on visualization v and count
+   violations of each soft constraint:
+   `x(v) = [n_p1(v), ..., n_pk(v)]`
+2. **Linear cost model:** `Cost(v) = wᵀx(v)`; lower cost is preferred.
+3. **Pairwise comparison:**
+   `f(v1, v2) = Cost(v1) − Cost(v2) = wᵀ(x1 − x2)`, which turns ranking
+   into **binary classification on the difference vector (x1 − x2)**.
+4. **Label:** y = −1 if v1 is preferred, otherwise y = +1.
+5. **RankSVM loss (hinge + L2):**
+   `L = (1/n) Σ max(0, 1 − yᵢ wᵀ(xᵢ1 − xᵢ2)) + λ‖w‖²`, with λ = 0.1.
+   - When v1 is preferred (y = −1), the loss is zero only if
+     `Cost(v1) ≤ Cost(v2) − 1`: the preferred chart must be cheaper by
+     a **margin of at least 1**.
+   - The L2 term keeps weights from growing too large (overfitting).
+6. **Symmetry:** (v1, v2; y) equals (v2, v1; −y), so every pair can be
+   standardized to (preferred, other; −1) without class imbalance.
+
+### Toy example
+
+Assume only two soft constraints. (Size is not used: putting a nominal
+field on size violates a hard constraint, §4.2.1.)
+- p1: a nominal field uses color.
+- p2: a nominal field uses shape.
+
+An experiment shows chart A (nominal → color) is significantly more
+accurate than chart B (nominal → shape).
+- x_A = [1, 0], x_B = [0, 1], so d = x_A − x_B = [1, −1].
+- Zero loss requires `wᵀd = w1 − w2 ≤ −1`, i.e. **w2 ≥ w1 + 1**.
+- The model learns that putting a nominal field on shape should cost
+  more than putting it on color, with no human tuning of weights.
+
+### Training setup (§5, §6.3)
+
+- **Features:** Draco-CQL's soft constraints plus rules describing the
+  design spaces of the Kim et al. and Saket et al. studies. New rules
+  start at weight 0.
+- **Training:** a classifier on the difference of each pair's feature
+  vectors, using an off-the-shelf SVM from scikit-learn. λ = 0.1 is the
+  value "for our initial experiments".
+- **Split:** 55% training, 15% validation, 30% test.
+- **Results:**
+  - 93% test-pair accuracy (hand-tuned Draco-CQL: 65%, only slightly
+    better than chance).
+  - 100% training accuracy on the Saket et al. data even with all Kim et
+    al. data included; pooling studies did not hurt either one.
+  - 96% validation accuracy when the harvesting threshold is relaxed to
+    p < 0.1.
+  - Test accuracy falls significantly behind validation accuracy only
+    below 250 training pairs, which the paper reads as redundancy in the
+    data and evidence that the model generalizes.
+  - In all 48 (Kim et al.) and 8 (Saket et al.) conditions, Draco-Learn
+    returns a top-performing encoding.
+
+### Reading learned weights
+
+- A larger weight means a larger penalty. What sets the ranking is the
+  **relative difference** between weights, not their absolute size.
+- If compared charts always have the same total number of violations,
+  adding a constant to every weight leaves every comparison unchanged;
+  the L2 term then picks a solution near zero, so negative weights can
+  appear (site demo, Part 9). A negative weight means the violation is
+  actually preferred. The paper does not discuss the sign of learned
+  weights. **[unstated]**
+- Clingo uses integer costs, but the paper does not say how real-valued
+  weights are converted. **[unstated]**
+
+### MLN interpretation (§2.5, §4.2.2, Appendix)
+
+- Draco's preference model forms a Markov logic network (MLN): soft
+  constraints are logical formulas and weights are their learnable
+  parameters.
+- Finding the optimal completion is MAP inference in the MLN. Because
+  the ASP solver minimizes cost directly, the partition function never
+  has to be computed.
+
+### Limitations (RankSVM view)
+
+- **Linear model:** feature interactions are captured only if a rule is
+  written for them.
+- **Imprecise wording:** the paper says "linear regression ... minimizing
+  the hinge loss", but minimizing hinge loss is linear classification,
+  not regression (recorded in `docs/01_paper/04_critical-review.md`).
+- **No comparison with other ranking methods** such as RankNet or
+  LambdaMART. **[unstated]**
+
+## 7. Preparing for questions after the talk: Vega-Lite, ASP, RankSVM
 
 Source tags: **[paper §]** = supported by the paper, **[background]** =
 general knowledge outside the paper (say so when answering),
@@ -546,6 +631,52 @@ design quality (e.g., at most 8 shapes). **[§4.2.1]**
 A. No. The site borrows only Draco's cost model (sum of violation count ×
 weight) and computes it directly in TypeScript. Its constraints and
 weights are hand-tuned for the site, not the paper's knowledge base.
+
+### RankSVM
+
+**Q. How important is RankSVM to Draco?**
+A. One of the paper's two contributions is a method to learn weights from
+experimental data (Abstract), and that method is RankSVM. **[§5]** The gap
+between hand-tuned (Draco-CQL) and learned (Draco-Learn) weights, 93% vs.
+65% test-pair accuracy, comes from this step. **[§6.3]**
+
+**Q. Why RankSVM and not a neural ranking model?**
+A. Draco's cost is linear in violation counts, so a linear pairwise model's
+coefficients are exactly the soft-constraint weights, which stay readable
+and editable per rule. **[§5]** There is no experimental comparison with
+other ranking methods. **[unstated]**
+
+**Q. The paper says "linear regression". Is it regression?**
+A. No. Minimizing hinge loss is linear classification of the sign of the
+difference vector. The wording is imprecise, and the review lists it among
+notation issues. **[§5, reviewer's opinion]**
+
+**Q. If every pair is standardized to y = −1, there is only one class. Can
+an SVM still be trained?**
+A. The paper's loss has no bias term, so it is symmetric about the origin,
+and the paper argues that standardizing all pairs to (preferred, other;
+−1) causes no problem. **[§5]** Standard scikit-learn classifiers usually
+need two classes, though, and the paper does not say how this was handled
+(e.g., flipping some pairs or disabling the intercept). **[unstated;
+scikit-learn behavior is background]**
+
+**Q. How should a negative weight be read?**
+A. Violating that rule is actually preferred. When compared charts have
+equal total violations, only relative differences matter, so L2
+regularization picks values near zero and some can be negative.
+**[background]** The paper does not discuss the sign of learned weights.
+**[unstated]**
+
+**Q. How much training data was needed?**
+A. About 1,100 pairs from Kim & Heer and 10 from Saket et al. **[§6.3.1]**
+Test accuracy drops significantly only below 250 training pairs. **[§6.3]**
+
+**Q. Isn't 93% overfitting?**
+A. It is measured on a held-out 30% test split (55% train, 15% validation),
+so it is not overfitting to the training pairs. **[§6.3]** But the test
+pairs come from the same experiments, so it does not show performance
+outside their narrow design space (mostly scatterplots). **[reviewer's
+opinion]**
 
 ## Concept map
 

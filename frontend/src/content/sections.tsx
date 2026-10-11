@@ -6,6 +6,7 @@ import { DesignSpace } from '../demos/DesignSpace'
 import { WeightSliders } from '../demos/WeightSliders'
 import { Pipeline } from '../demos/Pipeline'
 import { RankDemo } from '../demos/RankDemo'
+import { PairHarvest } from '../demos/PairHarvest'
 import { EvidenceDemo } from '../demos/Evidence'
 
 // 모든 보기(Paper / Deck / Explorer)가 공유하는 단일 콘텐츠 원본 (docs/03_outline.md)
@@ -209,18 +210,38 @@ export const SECTIONS: Section[] = [
     id: 'learn',
     num: 8,
     title: 'weight를 데이터에서 배우기: learning to rank',
-    cite: '§5, §6.3.1',
+    cite: '§2.5, §5, §6.3.1',
     kind: 'paper',
-    lead: '정답 차트는 없지만 "A가 B보다 낫다"는 실험 결과는 있다. RankSVM이 이 순위 쌍으로 weight를 학습한다.',
+    lead: '정답 차트는 없지만 "A가 B보다 낫다"는 실험 결과는 있다. 그래서 점수가 아니라 순서를 배운다.',
     points: [
-      <>두 차트 비교: f(v1, v2) = Cost(v1) − Cost(v2) = wᵀ(x1 − x2). 순위 문제가 차이 벡터의 이진 분류로 바뀝니다.</>,
-      <>RankSVM: hinge loss + L2 정규화(λ = 0.1). 선호되는 차트의 비용이 1 이상 낮아야 손실이 0입니다.</>,
-      <>새 규칙은 weight 0에서 시작해 다시 학습하면 됩니다. 서로 다른 실험의 데이터를 섞어 학습할 수 있습니다.</>,
+      <>부분 명세마다 유일한 최적 완성이 없어서, "이 질의의 정답 차트" 같은 학습 데이터는 만들 수 없습니다(§2.5).</>,
+      <>지각 실험은 "같은 데이터·과업에서 A가 B보다 유의하게 정확했다"는 <b>순위 쌍</b>을 만듭니다. 서로 다른 실험의 쌍도 섞을 수 있습니다.</>,
+      <>각 차트는 Clingo로 센 soft constraint 위반 횟수 <code>x = [n₁(v), …, n_k(v)]</code>로 바뀝니다. 비용은 <code>wᵀx</code>이므로 배울 것은 w뿐입니다.</>,
+    ],
+    detail: (
+      <>
+        <p>순위 쌍 수집(§6.3.1): 응답을 (데이터 스키마, 과업)별로 묶고, 묶음 안에서 시각화 쌍을 모두 만든 뒤, 정확도나 시간 차이가 Fisher's test에서 p &lt; 0.01인 쌍만 남깁니다. Kim &amp; Heer에서 약 1,100쌍, Saket et al.에서 10쌍을 얻었습니다.</p>
+        <p>Learning to rank는 원래 검색 결과를 정렬하려고 발전한 방법입니다(참고문헌 [36]). 항목 하나의 점수를 맞히는 pointwise, 두 항목의 순서를 맞히는 pairwise, 목록 전체를 최적화하는 listwise가 있고, Draco는 pairwise인 RankSVM을 씁니다.</p>
+      </>
+    ),
+    Demo: PairHarvest,
+  },
+  {
+    id: 'ranksvm',
+    num: 9,
+    title: 'RankSVM: 순위 쌍을 분류 문제로',
+    cite: '§5, §6.3',
+    kind: 'paper',
+    lead: '두 차트의 비용 차이 wᵀ(x1 − x2)의 부호만 맞히면 된다. 순위 학습이 선형 SVM 분류가 된다.',
+    points: [
+      <>쌍 비교: f(v1, v2) = Cost(v1) − Cost(v2) = wᵀ(x1 − x2). 차이 벡터 하나를 "v1이 낫다 / v2가 낫다"로 분류합니다.</>,
+      <>hinge loss + L2 정규화(λ = 0.1). 선호되는 차트의 비용이 <b>1 이상</b> 낮아야 손실이 0입니다.</>,
+      <>학습된 w가 곧 soft constraint의 weight입니다. 새 규칙은 weight 0에서 시작해 다시 학습하면 됩니다.</>,
     ],
     detail: (
       <>
         <p className="formula">L = (1/n) Σᵢ max(0, 1 − yᵢ wᵀ(xᵢ1 − xᵢ2)) + λ‖w‖²</p>
-        <p>순위 쌍 수집(§6.3.1): 응답을 (데이터 스키마, 과업)별로 묶고, 묶음 안에서 시각화 쌍을 모두 만든 뒤, 정확도나 시간 차이가 Fisher's test에서 p &lt; 0.01인 쌍만 남깁니다. Kim &amp; Heer에서 약 1,100쌍, Saket et al.에서 10쌍을 얻었습니다.</p>
+        <p>(v1, v2; y)와 (v2, v1; −y)는 같은 정보라서 모든 쌍을 (선호, 비선호; −1) 꼴로 맞춰도 클래스 불균형이 생기지 않습니다(§5). 학습에는 scikit-learn의 SVM을 그대로 썼고, 데이터는 학습 55%, 검증 15%, 테스트 30%로 나눴습니다(§6.3). 결과는 Part 10에서 봅니다.</p>
         <p>논문은 이 선호 모델을 Markov Logic Network로 해석합니다. 최적 완성 찾기는 MAP 추론과 같고, ASP solver가 비용을 최소화하므로 partition function을 계산할 필요가 없습니다(Appendix).</p>
       </>
     ),
@@ -228,7 +249,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'evidence',
-    num: 9,
+    num: 10,
     title: '증거: Draco-APT → Draco-CQL → Draco-Learn',
     cite: '§6, Fig. 7, 8',
     kind: 'paper',
@@ -248,7 +269,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'critique',
-    num: 10,
+    num: 11,
     title: '평가: 강점과 한계',
     cite: '§7 + 리뷰어 의견',
     kind: 'review',
@@ -283,7 +304,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'discussion',
-    num: 11,
+    num: 12,
     title: '토론과 더 보기',
     cite: '§7.2',
     kind: 'review',

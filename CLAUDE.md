@@ -42,7 +42,7 @@ There are no tests. Visual checks so far were done by screenshotting `npm run pr
 
 The site applies Draco's own idea to itself. Three **views** (Paper / Deck / Explorer) render the same content, and a cost toast scores each view against site-design soft constraints, using a weight set chosen by the **context** toggle (present / read / explore).
 
-- `src/content/sections.tsx`: the single content source (12 parts, Part 0-11). Each part has `lead`, `points`, optional `detail` (hidden in Deck), and an optional `Demo` component. Every view reads only from here.
+- `src/content/sections.tsx`: the single content source (13 parts, Part 0-12). Each part has `lead`, `points`, optional `detail` (hidden in Deck), and an optional `Demo` component. Every view reads only from here.
 - `src/design/model.ts`: the site's own constraint knowledge base (soft constraints, per-context weights, per-view violation counts, facts, cost and ranking). These are hand-tuned values for the site, **not** the paper's knowledge base, and the UI says so. Keep `docs/02_design.md` in sync when changing them.
 - `src/views/`: `PaperView`, `DeckView` (arrow keys, `?slide=`), `ExplorerView`. `App.tsx` keeps view, context, and slide in the URL query string and localStorage; keys `1`/`2`/`3` switch views.
 - `src/demos/`: interactive demos, one per part, tied to paper sections (Fig. 2 code pair, design-space pruning, weight sliders using the §6.2 weights, query pipeline, an in-browser RankSVM, evidence tiles with the Fig. 8 task toggle). Captions mark which values come from the paper and which are illustrative.

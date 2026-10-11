@@ -36,6 +36,7 @@
 |---|---|---|---|---|
 | IMP-001 | "이 사이트도 Draco처럼 설계했습니다" 문구를 정제하고, 안내 멘트는 대본으로 | Part 0 `points` | **B** 단순 내용 수정 (+대본) | 반영 완료 (60442fc) |
 | IMP-002 | Vega-Lite 명세가 나오기 전에 Vega-Lite 설명이 먼저 필요 | Part 2 (Deck 3) | **A** 슬라이드 추가 | 반영 완료 (60442fc) |
+| IMP-003 | RankSVM이 중요한 개념이면 슬라이드 1개와 core concepts 파트 1개 추가 | Part 8 → Part 8, 9 | **A** 슬라이드 추가 | 반영 완료 (COMMIT) |
 
 ---
 
@@ -114,3 +115,31 @@
 - 새 Part 2 "Vega-Lite: 차트를 선언하는 문법"(§2.3, §4.1)과 데모 `src/demos/SpecPlayground.tsx`를 추가했다. 기존 파트는 Part 3 "Vega-Lite 명세를 facts로"(§4.1, Fig. 2)가 됐다.
 - 반영안과 다른 점: "생략한 값은 컴파일러가 채운다"는 문장은 §4.1에 있어서 새 파트의 근거를 §2.3, §4.1로 적었다. 기존 파트의 셋째 요점은 detail과 겹쳐서 "데이터 성질과 과업도 facts로 적는다"로 바꿨다.
 - 목차, 대본, `CLAUDE.md`의 파트 수를 12개로 고쳤다. 데스크톱(라이트·다크)과 모바일(390px)에서 화면을 확인했다.
+
+---
+
+### IMP-003 · RankSVM 슬라이드와 core concepts 파트 추가
+
+**요청 (2026-10-11)**
+> RankSVM이 Draco에서 얼마나 중요한지 살펴보고 중요한 개념이면 이것도 마찬가지로 발표자료에 슬라이드 1개 추가, core concepts에 한 파트 추가 진행해줘.
+
+요청에 "중요하면 진행"이라는 조건부 승인이 들어 있어, 검토 후 바로 반영했다.
+
+**검토: 중요도**
+- **핵심 개념이다.** 논문 초록은 기여를 "제약으로 설계 지식을 모델링하는 것"과 "실험 데이터로 soft constraint weight를 학습하는 방법" 두 가지로 적는다. RankSVM은 뒤의 것을 실현하는 유일한 학습 알고리즘이고, §5 전체가 이 내용이다.
+- 평가의 핵심 결과(테스트 쌍 정확도 93% 대 65%, Fig. 8의 과업별 추천)가 모두 RankSVM으로 학습한 weight에서 나온다(§6.3).
+
+**검토: 현재 상태**
+- 사이트 Part 8 한 장에 learning to rank의 필요성(왜 순서를 배우나), 순위 쌍 수집, RankSVM 수식과 손실, MLN 해석, 브라우저 RankSVM 데모가 모두 들어 있었다. IMP-002의 Vega-Lite 파트와 같은 "한 파트에 메시지 둘 이상" 문제다.
+- core concepts의 "5. Learning to rank"에 RankSVM 수식과 예시가 이미 있었다. 그대로 새 파트를 만들면 내용이 겹친다.
+- **발견한 오류:** Part 9(당시 Part 8)의 RankSVM 데모와 core concepts의 작은 예시가 "nominal 필드를 size에 씀"을 학습할 soft 특징으로 썼다. 그런데 이것은 Draco의 hard constraint(`:- channel(E,size), type(E,nominal).`, §4.2.1, 사이트 Part 5에도 나옴)라서 해 공간에 아예 들어오지 않는다. 청중이 지적할 수 있는 모순이다.
+
+**결정: A 슬라이드 추가 후 내용 보강**
+
+**반영 결과 (2026-10-11)**
+- **Part 8 "weight를 데이터에서 배우기: learning to rank" (§2.5, §5, §6.3.1):** 왜 점수가 아니라 순서를 배우는지, 순위 쌍을 어떻게 모으는지, 차트가 어떻게 feature vector가 되는지만 다룬다. 새 데모 `src/demos/PairHarvest.tsx`: 수집 4단계와 예시 쌍(Origin → color 차트와 Origin → shape 차트). 실험 결과를 토글하면 쌍의 순서와 차이 벡터가 바뀐다.
+- **새 Part 9 "RankSVM: 순위 쌍을 분류 문제로" (§5, §6.3):** 차이 벡터 분류, hinge + L2(λ = 0.1)와 margin 1, 학습된 w가 곧 weight, 새 규칙은 0에서 시작. 기존 RankSVM 데모를 이 파트로 옮겼다. 결과 수치(93% 대 65%)는 Part 10(증거)에만 두어 겹치지 않게 했다.
+- **오류 수정:** RankSVM 데모의 특징을 nominal → color / shape / row로 바꿨다. Part 6 슬라이더가 쓰는 §6.2 Draco-CQL weight와 같은 채널이다. core concepts의 작은 예시도 color 대 shape로 바꿨다.
+- **core concepts (Eng/Kor):** 새 "6. RankSVM" 파트를 만들고, 5절에 있던 수식과 작은 예시를 이리로 옮겼다. 왜 중요한가, SVM 기초[배경], 학습 설정과 결과(§6.3), weight 읽는 법, MLN 해석, 한계를 더했다. 질문 대비 절은 7절이 되었고 RankSVM 질문 7개를 추가했다(24문항).
+- 파트가 13개(Part 0~12)가 되었다. 시간 배분은 Part 8 1:00, Part 9 1:30으로 전체 약 16분이다. 목차, 대본, 설계 문서(데모 설명), `CLAUDE.md`를 고쳤다.
+

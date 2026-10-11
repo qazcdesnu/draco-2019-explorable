@@ -158,7 +158,7 @@ weight 0은 "규칙은 그대로 있지만 이 상황에서는 비용에 영향�
 2. **설계 공간 가지치기**: 후보 점들이 hard constraint 단계별로 사라짐 (Fig. 3, 4)
 3. **Weight 슬라이더**: 후보 차트들의 비용 순위가 실시간으로 바뀜 (§4.2.2)
 4. **질의 → 완성 파이프라인**: Fig. 6 예시를 단계별 애니메이션으로
-5. **Learning to rank 미니 데모**: color와 size 쌍을 추가하면 weight가 움직임 (§5)
+5. **Learning to rank 미니 데모**: 실험 결과 쌍(nominal → color / shape / row)을 추가하면 weight가 움직임 (§5). size는 nominal에 쓰면 hard constraint 위반이라 특징에서 뺐다(IMP-003)
 6. **과업 토글**: Draco-CQL과 Draco-Learn의 최적 차트 비교 (Fig. 8)
 7. **2019 Draco Editor 링크**: https://idl.uw.edu/draco-editor/#/editor
 

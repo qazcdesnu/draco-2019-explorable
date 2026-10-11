@@ -379,3 +379,15 @@ caption { text-align: left; color: var(--text-2); font-size: 0.9em; padding-bott
 .spec-choice .stepper { margin: 0; }
 .spec-key { min-width: 3.6em; font-size: 13px; color: var(--text-2); }
 .stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 순위 쌍 수집 (PairHarvest) */
+.harvest-steps { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.harvest-steps li { font-size: 13px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--text-2); }
+.harvest-steps li { display: flex; gap: 8px; align-items: baseline; }
+.harvest-steps .step-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; }
+.pair-fig { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.pair-fig.win { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pair-fig figcaption b { color: var(--accent); }
+.pair-fig .vec { margin: 6px 0 0; font-size: 13px; }
+.harvest-result { margin-top: 12px; }
+.harvest-result p { margin: 8px 0 0; }

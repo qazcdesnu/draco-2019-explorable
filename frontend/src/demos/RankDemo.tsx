@@ -2,16 +2,17 @@ import { useState } from 'react'
 
 // §5의 RankSVM을 특징 3개짜리로 줄인 데모.
 // 특징 = "nominal 필드를 이 채널에 썼다"의 위반 횟수. 실험 결과 카드는 설명용 가상 데이터다.
-const FEATURES = ['color', 'size', 'shape'] as const
+// size는 nominal에 쓰면 hard constraint 위반(§4.2.1)이라 특징에서 뺐다. color/shape/row는 §6.2 Draco-CQL weight와 같은 채널이다.
+const FEATURES = ['color', 'shape', 'row'] as const
 type Feature = (typeof FEATURES)[number]
 
 type Pair = { id: string; better: Feature; worse: Feature; note: string }
 
 const PAIRS: Pair[] = [
-  { id: 'p1', better: 'color', worse: 'size', note: '범주 구분 과업에서 color 차트가 더 정확' },
-  { id: 'p2', better: 'color', worse: 'shape', note: 'color 차트가 shape 차트보다 더 빠름' },
-  { id: 'p3', better: 'shape', worse: 'size', note: 'shape 차트가 size 차트보다 더 정확' },
-  { id: 'p4', better: 'size', worse: 'color', note: '상충하는 결과 (다른 실험 조건)' },
+  { id: 'p1', better: 'color', worse: 'shape', note: '범주 구분 과업에서 color 차트가 더 정확' },
+  { id: 'p2', better: 'row', worse: 'shape', note: 'row로 나눈 차트가 shape 차트보다 더 빠름' },
+  { id: 'p3', better: 'color', worse: 'row', note: 'color 차트가 row로 나눈 차트보다 더 정확' },
+  { id: 'p4', better: 'shape', worse: 'color', note: '상충하는 결과 (다른 실험 조건)' },
 ]
 
 const LAMBDA = 0.1
@@ -93,7 +94,7 @@ export function RankDemo() {
             )}
           </p>
           <p className="small">
-            weight에는 차이만 의미가 있습니다. 모든 weight에 같은 값을 더해도 쌍의 비교 결과는 같으므로, L2 정규화가 0 근처의 해를 고릅니다. 그래서 음수 weight도 나옵니다.
+            이 데모의 차트는 모두 특징을 하나씩만 위반하므로 weight의 차이만 의미가 있습니다. 모든 weight에 같은 값을 더해도 쌍의 비교 결과가 같아서, L2 정규화가 0 근처의 해를 고릅니다. 그래서 음수 weight도 나옵니다.
           </p>
         </div>
       </div>
