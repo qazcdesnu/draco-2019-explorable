@@ -36,7 +36,7 @@
 |---|---|---|---|---|
 | IMP-001 | "이 사이트도 Draco처럼 설계했습니다" 문구를 정제하고, 안내 멘트는 대본으로 | Part 0 `points` | **B** 단순 내용 수정 (+대본) | 반영 완료 (60442fc) |
 | IMP-002 | Vega-Lite 명세가 나오기 전에 Vega-Lite 설명이 먼저 필요 | Part 2 (Deck 3) | **A** 슬라이드 추가 | 반영 완료 (60442fc) |
-| IMP-003 | RankSVM이 중요한 개념이면 슬라이드 1개와 core concepts 파트 1개 추가 | Part 8 → Part 8, 9 | **A** 슬라이드 추가 | 반영 완료 (COMMIT) |
+| IMP-003 | RankSVM이 중요한 개념이면 슬라이드 1개와 core concepts 파트 1개 추가 | Part 8 → Part 8, 9 | **A** 슬라이드 추가 | 반영 완료 (b3fc3ca) |
 
 ---
 
