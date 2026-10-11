@@ -31,7 +31,7 @@ Site content should come from `docs/01_paper/` and the core-concept notes. `2019
 `frontend/` is a Vite + React + TypeScript app (create-vite 9, Vite 8, React 19; linting with oxlint). Run from `frontend/`:
 
 - `npm run dev`: dev server
-- `npm run build`: type-check (`tsc -b`), then production build to `dist/`
+- `npm run build`: type-check (`tsc -b`), production build to `dist/`, then `scripts/third-party-licenses.mjs` writes `dist/THIRD_PARTY_LICENSES.txt` (the minified bundle drops license comments)
 - `npm run lint`: oxlint
 - `npm run preview`: serve the built `dist/`
 
@@ -57,3 +57,4 @@ The site applies Draco's own idea to itself. Three **views** (Paper / Deck / Exp
 
 - The vault path contains spaces and parentheses (`01_Draco(InfoVis)`); always quote paths in shell commands.
 - Git repo on `main`; commit author is set locally (`git config user.name/user.email`), not globally. Vercel deploys from the GitHub remote.
+- Deploy: Vercel project with Root Directory `frontend`; settings in `frontend/vercel.json`. Every push to `main` redeploys production. See `docs/05_deploy.md`.
