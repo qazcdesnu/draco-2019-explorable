@@ -372,3 +372,10 @@ caption { text-align: left; color: var(--text-2); font-size: 0.9em; padding-bott
 .credits b { color: var(--text-2); margin-right: 6px; }
 .view-explorer .credits { grid-column: 1 / -1; margin-top: 8px; }
 .view-deck .credits { margin-top: 32px; font-size: 13px; }
+
+/* Vega-Lite 명세 편집기 (SpecPlayground) */
+.spec-controls { display: grid; gap: 6px; margin-bottom: 10px; }
+.spec-choice { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spec-choice .stepper { margin: 0; }
+.spec-key { min-width: 3.6em; font-size: 13px; color: var(--text-2); }
+.stepper button:disabled { opacity: 0.4; cursor: not-allowed; }

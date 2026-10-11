@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Code } from '../components/Code'
 import { CodePair } from '../demos/CodePair'
+import { SpecPlayground } from '../demos/SpecPlayground'
 import { DesignSpace } from '../demos/DesignSpace'
 import { WeightSliders } from '../demos/WeightSliders'
 import { Pipeline } from '../demos/Pipeline'
@@ -34,7 +35,7 @@ export const SECTIONS: Section[] = [
     points: [
       <><i>Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco</i></>,
       <>Dominik Moritz, Chenglong Wang, Greg L. Nelson, Halden Lin, Adam M. Smith, Bill Howe, Jeffrey Heer</>,
-      <>이 사이트도 Draco처럼 설계했습니다. 위에서 <b>보기</b>와 <b>상황</b>을 바꾸면 각 보기가 어떤 soft constraint를 지키거나 위반하는지 보여 줍니다.</>,
+      <><b>메타 장치:</b> 이 사이트의 세 가지 보기(Paper · Deck · Explorer)를 Draco의 비용 모델로 평가합니다. 위반한 soft constraint의 weight 합이 비용입니다(weight는 이 사이트용으로 정한 값).</>,
     ],
     detail: (
       <>
@@ -69,27 +70,46 @@ export const SECTIONS: Section[] = [
   {
     id: 'vegalite',
     num: 2,
-    title: '시각화를 쓰는 언어: Vega-Lite',
-    cite: '§2.3, §4.1, Fig. 2',
+    title: 'Vega-Lite: 차트를 선언하는 문법',
+    cite: '§2.3, §4.1',
     kind: 'paper',
-    lead: '차트 = data + mark + encoding. Draco는 Vega-Lite 명세를 logical facts로 옮겨 추론한다.',
+    lead: "Vega-Lite는 차트를 '데이터 + mark + encoding'의 JSON으로 선언하는 고수준 문법이다.",
     points: [
-      <><code>encoding</code>은 field를 channel(x, y, color, size, shape, row, column …)에 대응시킵니다.</>,
-      <>각 인코딩에는 type(nominal / ordinal / quantitative / temporal)과 aggregate, bin 같은 변환이 붙습니다.</>,
-      <>Draco는 JSON의 중첩을 풀어 <code>mark(bar).</code>, <code>channel(e0,x).</code> 같은 평평한 facts로 표현합니다.</>,
+      <>Wilkinson의 Grammar of Graphics, ggplot2, Tableau의 VizQL에서 영감을 받은 언어입니다.</>,
+      <>차트 하나 = <b>mark</b> 하나(bar, point, tick …) + <b>encoding</b> 여러 개. encoding은 데이터 field를 channel(x, y, color …)에 대응시키고, type(nominal / ordinal / quantitative / temporal)과 bin·aggregate 같은 변환을 붙입니다.</>,
+      <>scale, axis처럼 적지 않은 값은 컴파일러가 type에 맞게 채웁니다. 그래서 명세가 짧고, 가능한 차트를 탐색하고 추론하기 좋습니다.</>,
+    ],
+    detail: (
+      <>
+        <p>Vega-Lite는 단일 뷰 외에 facet(trellis), layer, concat도 지원하지만, 논문은 <b>단일 뷰와 row / column facet</b>만 다룹니다. 이 범위로도 막대, 히스토그램, 점, 산점도, 선, 영역 차트를 표현할 수 있습니다(§2.3).</p>
+        <p>Vega-Lite 원 논문: A. Satyanarayan, D. Moritz, K. Wongsuphasawat, J. Heer. "Vega-Lite: A Grammar of Interactive Graphics." IEEE TVCG 23(1), 2017 (Draco 논문의 참고문헌 [52]).</p>
+      </>
+    ),
+    Demo: SpecPlayground,
+  },
+  {
+    id: 'facts',
+    num: 3,
+    title: 'Vega-Lite 명세를 facts로',
+    cite: '§4.1, Fig. 2',
+    kind: 'paper',
+    lead: 'Draco는 Vega-Lite 명세의 JSON 중첩을 풀어 평평한 logical facts로 옮긴다.',
+    points: [
+      <>mark는 <code>mark(bar).</code> 하나로, encoding은 id를 붙여 <code>encoding(e0).</code>로 씁니다.</>,
+      <>field, type, aggregate는 그 id에 붙는 사실이 됩니다: <code>field(e0,cylinders).</code>, <code>type(e0,ordinal).</code></>,
+      <>채널도 <code>channel(e0,x).</code>라는 사실입니다. 데이터의 성질과 사용자 과업도 같은 식의 facts로 적어 규칙이 함께 참조합니다.</>,
     ],
     detail: (
       <>
         <p>채널마다 predicate(<code>field_x</code> 등)를 두지 않고 <code>channel(E,C)</code> 형태로 일반화했습니다. 그래야 detail 채널을 여러 번 쓸 수 있고, 특정 채널에 묶이지 않은 일반 제약을 쓰기 쉽습니다(§4.1).</p>
         <p>데이터 스키마는 <code>num_rows/1</code>, <code>fieldtype/2</code>, <code>cardinality/2</code>, <code>entropy/2</code>, <code>extent/3</code>, 사용자 과업은 <code>task/1</code>(value / summary)과 <code>interesting/2</code>로 표현합니다.</p>
-        <p>논문은 Vega-Lite 전체가 아니라 단일 뷰와 facet 뷰(row / column)만 다룹니다(§2.3).</p>
       </>
     ),
     Demo: CodePair,
   },
   {
     id: 'asp',
-    num: 3,
+    num: 4,
     title: '규칙을 쓰는 언어: Answer Set Programming',
     cite: '§3',
     kind: 'paper',
@@ -117,7 +137,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'space',
-    num: 4,
+    num: 5,
     title: '설계 공간과 hard constraints',
     cite: '§4.2.1, Fig. 3',
     kind: 'paper',
@@ -141,7 +161,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'soft',
-    num: 5,
+    num: 6,
     title: 'Soft constraints와 비용',
     cite: '§4.2.2, §6.2',
     kind: 'paper',
@@ -170,7 +190,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'query',
-    num: 6,
+    num: 7,
     title: '질의에서 차트로',
     cite: '§4.3, Fig. 5, 6',
     kind: 'paper',
@@ -187,7 +207,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'learn',
-    num: 7,
+    num: 8,
     title: 'weight를 데이터에서 배우기: learning to rank',
     cite: '§5, §6.3.1',
     kind: 'paper',
@@ -208,7 +228,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'evidence',
-    num: 8,
+    num: 9,
     title: '증거: Draco-APT → Draco-CQL → Draco-Learn',
     cite: '§6, Fig. 7, 8',
     kind: 'paper',
@@ -228,7 +248,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'critique',
-    num: 9,
+    num: 10,
     title: '평가: 강점과 한계',
     cite: '§7 + 리뷰어 의견',
     kind: 'review',
@@ -263,7 +283,7 @@ export const SECTIONS: Section[] = [
   },
   {
     id: 'discussion',
-    num: 10,
+    num: 11,
     title: '토론과 더 보기',
     cite: '§7.2',
     kind: 'review',
