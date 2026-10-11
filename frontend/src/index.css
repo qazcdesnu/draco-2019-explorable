@@ -329,6 +329,9 @@ caption { text-align: left; color: var(--text-2); font-size: 0.9em; padding-bott
 .toast-list li.viol { background: color-mix(in srgb, var(--series-2) 10%, transparent); }
 .toast-list .mark { font-weight: 700; }
 .toast-list .viol .mark { color: var(--viol); }
+.toast-list li.viol.zero { background: transparent; border: 1px dashed var(--line); opacity: 0.75; }
+.toast-list .viol.zero .mark { color: var(--muted); }
+.toast-list .meaning em { font-style: normal; color: var(--muted); }
 .toast-list .sat .mark { color: var(--sat); }
 .toast-list code { font-size: 12px; }
 .toast-list .meaning { color: var(--text-2); }
