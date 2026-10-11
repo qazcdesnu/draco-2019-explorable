@@ -11,7 +11,7 @@
 | 2 | Draco 컨셉에 맞는 웹 디자인 결정 | `docs/02_design.md` | 1차 완료 (권장안 채택) |
 | 3 | 리뷰 순서, 목차, 파트 배열 | `docs/03_outline.md` | 1차 완료 |
 | 4 | 문서 기반으로 웹사이트 구현 | `frontend/src/` | 1차 결과물 완성 (피드백 대기) |
-| 5 | 빌드, 배포 전략 문서화 후 직접 배포 | `docs/05_deploy.md` | 예정 |
+| 5 | 빌드, 배포 전략 문서화 후 직접 배포 | `docs/05_deploy.md` | 문서 완료, Vercel 연결 진행 중 |
 
 ## 1단계 문서 (`docs/01_paper/`)
 
@@ -42,4 +42,6 @@
 ## 결정 사항 기록
 
 - 백엔드: 최종 사이트가 완성될 때까지 `backend/` 폴더는 비워 둔 채 유지한다. 현재 계획은 정적 프론트엔드만 만드는 것이다.
+- 배포: 정적 사이트로 Vercel에 배포한다. GitHub `qazcdesnu/draco-2019-explorable`의 `main`에 push하면 자동 배포된다 (`docs/05_deploy.md`).
+- 라이선스: 직접 쓴 코드와 글은 MIT. 논문 PDF와 그림은 저장소에 넣지 않는다. 출처는 README와 사이트 하단에 적는다.
 - 프론트엔드: Vite + React + TypeScript (create-vite 9, Vite 8)
