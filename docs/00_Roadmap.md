@@ -32,7 +32,7 @@
 |---|---|---|
 | 2019 Draco 데모 (Draco Editor) | https://idl.uw.edu/draco-editor/#/editor | 2019 버전임을 확인함 (Vega-Lite v2, 브라우저용 clingo.wasm, `define.lp`/`weights.lp`). 발표 중 라이브 시연이나 웹사이트 링크로 쓸 수 있음 |
 | 논문에 적힌 공개 주소 (§1) | https://uwdata.github.io/draco/ | 현재 https://idl.uw.edu/draco/ 로 리다이렉트됨. 이후 버전 내용이 섞여 있을 수 있음 |
-| DOI | https://doi.org/10.1109/TVCG.2018.2865240 | |
+| 논문 (DOI) | https://doi.org/10.1109/TVCG.2018.2865240 | 논문의 공식 주소. IEEE Xplore 문서 8440847로 연결됨. Crossref 기록(2026-10-11 확인): IEEE TVCG 25(1), pp. 438–448, 2019년 1월호, DOI 등록 2018-08-20. Crossref와 PDF에는 학회명·학회 연도가 없으므로 "InfoVis 2019"처럼 쓰지 않고 "IEEE TVCG 2019"로 인용한다 |
 
 ## 반복 계획
 

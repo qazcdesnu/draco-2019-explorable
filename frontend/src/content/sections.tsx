@@ -35,12 +35,12 @@ export const SECTIONS: Section[] = [
     lead: '좋은 시각화의 지식을 제약으로 쓰면, 컴퓨터가 추천하고 데이터가 고친다.',
     points: [
       <><i>Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco</i></>,
-      <>Dominik Moritz, Chenglong Wang, Greg L. Nelson, Halden Lin, Adam M. Smith, Bill Howe, Jeffrey Heer</>,
+      <>Dominik Moritz, Chenglong Wang, Greg L. Nelson, Halden Lin, Adam M. Smith, Bill Howe, Jeffrey Heer · <a href="https://doi.org/10.1109/TVCG.2018.2865240">doi:10.1109/TVCG.2018.2865240</a></>,
       <><b>메타 장치:</b> 이 사이트의 세 가지 보기(Paper · Deck · Explorer)를 Draco의 비용 모델로 평가합니다. 위반한 soft constraint의 weight 합이 비용입니다(weight는 이 사이트용으로 정한 값).</>,
     ],
     detail: (
       <>
-        <p>DOI: <a href="https://doi.org/10.1109/TVCG.2018.2865240">10.1109/TVCG.2018.2865240</a></p>
+        <p>IEEE Transactions on Visualization and Computer Graphics 25(1), pp. 438–448, 2019년 1월호.</p>
         <p>이 리뷰는 2019년 논문에 실린 Draco만 다룹니다. 이후 버전은 마지막 파트의 "리뷰 범위 밖" 칸에서만 언급합니다.</p>
       </>
     ),

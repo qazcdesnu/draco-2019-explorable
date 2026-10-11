@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This folder (inside an Obsidian vault) holds a paper-review presentation for a "Visualization for Data Science" course. The paper is reviewed as an interactive **website**, not as a traditional slide-style engineering review.
 
-Paper: *Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco* (Moritz et al., IEEE TVCG 25(1), 2019, DOI 10.1109/TVCG.2018.2865240).
+Paper: *Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco* (Moritz et al., IEEE TVCG 25(1):438–448, 2019, https://doi.org/10.1109/TVCG.2018.2865240). Cite it as IEEE TVCG 2019; do not name a conference or year that the paper or its DOI record does not state.
 
 ## Workflow
 

@@ -5,7 +5,7 @@ export function Credits() {
       <p>
         <b>출처</b> D. Moritz, C. Wang, G. L. Nelson, H. Lin, A. M. Smith, B. Howe, J. Heer.
         "Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco."
-        <i> IEEE TVCG</i> 25(1), 2019. <a href="https://doi.org/10.1109/TVCG.2018.2865240">doi:10.1109/TVCG.2018.2865240</a>
+        <i> IEEE TVCG</i> 25(1):438–448, 2019. <a href="https://doi.org/10.1109/TVCG.2018.2865240">doi:10.1109/TVCG.2018.2865240</a>
       </p>
       <p>
         논문의 저작권은 IEEE와 저자에게 있습니다. 이 사이트는 수업 발표용 비공식 리뷰이며, 논문의 그림이나 PDF를 싣지 않습니다.

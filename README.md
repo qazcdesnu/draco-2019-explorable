@@ -1,6 +1,6 @@
 # draco-2019-explorable
 
-An explorable explanation of Draco (Moritz et al., IEEE InfoVis 2019): visualization design knowledge as constraints.
+An explorable explanation of Draco (Moritz et al., IEEE TVCG 2019): visualization design knowledge as constraints.
 
 **사이트:** https://draco-2019-explorable.vercel.app
 
@@ -10,8 +10,26 @@ An explorable explanation of Draco (Moritz et al., IEEE InfoVis 2019): visualiza
 
 > D. Moritz, C. Wang, G. L. Nelson, H. Lin, A. M. Smith, B. Howe, J. Heer.
 > "Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco."
-> *IEEE Transactions on Visualization and Computer Graphics* 25(1), 2019.
+> *IEEE Transactions on Visualization and Computer Graphics* 25(1):438–448, 2019.
 > [doi:10.1109/TVCG.2018.2865240](https://doi.org/10.1109/TVCG.2018.2865240)
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@article{moritz2019draco,
+  author  = {Moritz, Dominik and Wang, Chenglong and Nelson, Greg L. and Lin, Halden and Smith, Adam M. and Howe, Bill and Heer, Jeffrey},
+  title   = {Formalizing Visualization Design Knowledge as Constraints: Actionable and Extensible Models in Draco},
+  journal = {IEEE Transactions on Visualization and Computer Graphics},
+  volume  = {25},
+  number  = {1},
+  pages   = {438--448},
+  year    = {2019},
+  doi     = {10.1109/TVCG.2018.2865240}
+}
+```
+
+</details>
 
 이 리뷰는 2019년 논문에 실린 Draco만 다룹니다. Draco 2 등 이후 작업은 "리뷰 범위 밖"으로 표시한 곳에서만 언급합니다.
 
