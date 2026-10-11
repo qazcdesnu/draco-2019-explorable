@@ -84,6 +84,25 @@
 3. **탐색에 적합한 설계:** Vega-Lite는 처음부터 가능한 시각화 공간을 탐색하고 추론하기 쉽게 설계되었다. 그래서 Draco 같은 자동 설계 시스템의 대상 언어로 적합하다.
 4. **논문의 범위:** 논문은 Vega-Lite 전체가 아니라 **단일 뷰와 faceted 뷰**(`row`/`column`)만 다룬다. 이 부분집합으로도 bar, histogram, dot plot, scatter, line, area 차트를 표현할 수 있다. layer, concat, interaction은 향후 과제다.
 
+### 발표 사이트에서의 구성 (Part 2, Part 3)
+
+발표에서는 Vega-Lite를 두 단계로 나눠 설명한다. 논문도 Vega-Lite 소개(§2.3)와 facts로 옮기는 법(§4.1)을 나눠 다룬다.
+
+1. **Part 2 "차트를 선언하는 문법" (§2.3, §4.1):** Vega-Lite만 설명한다. 데모에서 mark와 field를 바꾸면 JSON 몇 줄만 바뀌어도 차트가 달라진다는 것을 보여 준다.
+2. **Part 3 "명세를 facts로" (§4.1, Fig. 2):** 같은 명세가 ASP facts로 어떻게 바뀌는지 보여 준다.
+
+데이터 type은 cars 데이터로 예를 들면 이해가 빠르다.
+
+| type | 뜻 | cars 예 | 기본 표현 |
+|---|---|---|---|
+| nominal | 순서 없는 범주 | `Origin` (Europe, Japan, USA) | 색 구분, 순서 없는 축 |
+| ordinal | 순서 있는 범주 | `Cylinders` (3, 4, 5, 6, 8) | 순서대로 놓인 띠 축 |
+| quantitative | 수치 | `Horsepower`, `Miles_per_Gallon` | 연속 축, 0 포함 여부를 scale로 지정 |
+| temporal | 시간 | `Year` | 시간 축 |
+
+- type은 기본 scale, axis, legend를 정할 뿐 아니라 Draco 규칙의 조건이 된다. 예를 들어 "size는 nominal 데이터에 쓰지 않는다"(expressiveness, §4.2.1)는 type을 보고 판단한다.
+- 데모에서 mark가 bar일 때 y에 `aggregate: mean`을 붙이는 것은 막대 하나가 값 하나를 나타내도록 한 **데모 설계 선택**이다. Draco 규칙이 아니다.
+
 **주의:** Hard constraint의 일부는 "좋은 디자인"이 아니라 **Vega-Lite 구현의 한계**를 반영한다. 예를 들어 shape는 8종뿐이므로 `:- channel(E,shape), cardinality(E,C), C > 8.` 같은 제약이 있다.
 
 ## 3. Soft and hard constraints
@@ -129,6 +148,44 @@ Draco는 시각화 설계 지식을 constraints로 표현한다. 두 개념의 �
 2. 규칙에 부합하는 후보 설계안을 탐색한다.
 3. hard constraints를 위반하는 설계안을 제외한다.
 4. 가중치가 적용된 soft constraints 등의 최적화 기준을 이용해 설계안을 평가하거나 선택한다.
+
+### 문법과 의미 (§3)
+
+| 형태 | 이름 | 읽는 법 | 예 |
+|---|---|---|---|
+| `A.` | fact (bodiless rule) | A는 참이다 | `mark(bar).` |
+| `A :- L1, ..., Ln.` | rule | 몸통(body)의 literal이 모두 참이면 머리(head) A도 참 | `light_on :- power_on, not broken.` |
+| `not B` | negation as failure | B를 **도출할 수 없다** (B가 거짓이라고 증명된 것이 아님) | `not zero(E)` |
+| `:- L1, ..., Ln.` | integrity constraint (headless rule, hard constraint) | 이 몸통이 성립하면 모순. 그런 answer set은 버린다 | `:- log(E), zero(E).` |
+| `:~ L1, ..., Ln. [w]` | weak constraint (soft constraint) | 성립할 때마다 비용 w. "가능하면 피한다" | `:~ continuous(E), not zero(E). [5]` |
+| `:~ L1, ..., Ln. [w@P,T]` | 우선순위가 있는 weak constraint | 비용 w를 우선순위 P 단계에 매긴다. T는 위반을 따로 세는 기준 | `:~ type(E,nominal), channel(E,color), priority(E,P). [2@P,E]` |
+| `l { A0; ...; An } k` | aggregate (choice) rule | 집합 중 최소 l개, 최대 k개가 참 | `1 { mark(bar); mark(line); mark(area); mark(point) } 1.` |
+
+- **변수:** 대문자로 시작하면 변수다(`E`, `C`). `0 { aggregate(E,count); aggregate(E,mean); ... } 1 :- encoding(E).`는 "모든 encoding E는 aggregate를 최대 하나 가진다"는 뜻이다(§4.2.1).
+- **predicate 표기:** Prolog 관례대로 이름과 인자 수로 부른다. `channel/2`는 인자가 두 개인 `channel`이다(§4 각주).
+- **answer set (stable model):** 제약과 모순이 없고, 참인 atom마다 근거(도출)가 있으며, 근거 없는 것은 참이라고 하지 않는 **최소한의** atom 집합이다(§3). Draco에서는 answer set 하나가 완성된 시각화 명세 하나다.
+- **구성적 성질:** 부정 literal은 "도출 안 됨"이면 참이지만, 긍정 literal은 반드시 도출되어야 참이다(§3).
+- **최적 answer set:** soft constraint가 있는 프로그램에서는 위반한 soft constraint의 weight 합이 가장 작은 answer set이 최적이다(§3). Pareto 최적 같은 더 풍부한 최적화도 ASP로 쓸 수 있지만, 학습할 선형 선호 모델에는 weight 합으로 충분하다고 논문은 말한다.
+
+### Draco가 ASP를 쓰는 방식 (§4)
+
+1. **도메인 정의:** aggregate rule로 각 속성이 가질 수 있는 값을 정한다(어떤 mark, 어떤 aggregate 등). tick mark를 지원하려면 `mark(tick)`을 추가하면 된다.
+2. **설계 공간 자르기:** integrity constraint로 문법에 어긋나는 것(well-formedness)과 데이터를 제대로 전달하지 못하는 것(expressiveness)을 없앤다. 일부는 Vega-Lite 구현의 한계를 반영한다.
+3. **선호:** soft constraint로 평가 함수를 **암묵적으로** 정의한다. 비용은 정수이고, 설계 공간에 전체 순서를 만든다(§4.2.2).
+4. **질의와 풀이:** 사용자의 데이터, 부분 명세, 과업을 facts와 규칙으로 바꿔 지식 베이스와 합치고, Clingo가 최적 answer set을 찾는다. Draco가 그 answer set을 Vega-Lite 명세로 되돌린다(§4.3).
+5. **학습용 특징 추출:** 완성된 명세에 Clingo를 돌려 soft constraint마다 위반 횟수를 세면 그것이 feature vector x가 된다(§5).
+
+### Clingo
+
+- 2019 Draco가 쓰는 solver다. conflict reasoning과 heuristic으로 탐색을 이끌어 수백만 변수 규모의 문제도 푼다(§2.4).
+- 논문은 Clingo의 내부 최적화 알고리즘을 자세히 설명하지 않는다. 사용법은 Potassco의 Clingo guide를 참고하라고만 한다.
+
+### 왜 ASP인가 (논문이 든 이유)
+
+- **잘 정의된 의미론과 효율적인 범용 알고리즘**(§1): 최적 인코딩 찾기를 "최적 answer set 찾기"로 정식화할 수 있다.
+- **지식과 탐색의 분리**(§2.4, §4): 설계자는 지식만 선언하고 탐색은 solver에 맡긴다. CompassQL처럼 모두 생성한 뒤 검사하는(generate-and-test) 명령형 구현은 불가능한 후보까지 만들고 평가하느라 자원을 낭비하고, 바꾸기도 어렵다.
+- **표현력, 효율, 사용 편의의 균형**(§2.4): 의사결정 지원, 제품 구성, 교육용 게임 설계 등에 이미 쓰였다.
+- **학습과 맞물림:** 비용이 위반 횟수의 선형 함수라서 RankSVM으로 weight를 학습하면 바로 쓸 수 있다(§5).
 
 **중요한 구분:** ASP는 규칙 기반 추론과 해 탐색을 담당한다. 실험 데이터로부터 soft-constraint weights를 학습하는 것은 이 메커니즘과 결합할 수 있는 별도의 학습 과정이다.
 
@@ -198,6 +255,65 @@ soft constraint가 두 개뿐이라고 가정하자.
 - 실험이 다룬 좁은 설계 공간(주로 산점도) 밖으로 일반화된다는 보장은 없다.
 
 **Draco에서의 역할:** ASP는 "주어진 weight로 최적 설계 찾기"를 맡고, learning to rank는 "그 weight를 실험 데이터로부터 정하기"를 맡는다. 비용이 feature 벡터의 선형 함수이기 때문에 이 둘이 깔끔하게 맞물린다.
+
+## 6. 발표 후 질문 대비: Vega-Lite와 ASP
+
+출처 표기: **[논문 §]** = 논문에 근거, **[배경]** = 논문 밖의 일반 지식(논문 주장이 아니라고 밝히고 답할 것), **[명시 없음]** = 논문이 말하지 않는 내용(추측으로 채우지 말 것).
+
+### Vega-Lite
+
+**Q. Vega-Lite는 Vega나 D3와 뭐가 다른가요?**
+A. D3는 그림을 그리는 과정을 코드로 하나하나 지시하는 JavaScript 라이브러리이고, Vega는 그보다 위의 선언적 문법, Vega-Lite는 그보다 더 위의 고수준 문법입니다. Vega-Lite 명세는 Vega로 컴파일되어 그려집니다. **[배경]** Draco 논문에서 Vega-Lite는 Draco가 추론하는 대상이자 출력 언어입니다. **[논문 §2.3, Fig. 1]**
+
+**Q. 왜 ggplot2나 Tableau가 아니라 Vega-Lite인가요?**
+A. 논문이 든 이유는 세 가지입니다. Vega-Lite는 가능한 시각화 공간을 탐색하고 추론하기 쉽게 설계된 언어이고 **[§2.3]**, 앞선 시스템 CompassQL도 Vega-Lite의 논리 표현을 썼으며 **[§2.3]**, APT가 쓰던 그래픽 대수는 더 이상 쓰이지 않는 데 비해 Vega-Lite는 더 완전한 언어입니다 **[§2.1]**. 명세가 JSON이라 프로그램이 만들고 고치기 쉽다는 점도 있습니다. **[배경]**
+
+**Q. JSON을 그대로 쓰면 되지, 왜 facts로 바꾸나요?**
+A. ASP solver는 facts와 규칙 위에서만 추론합니다. 중첩된 JSON을 `mark(bar).`, `channel(e0,x).` 같은 평평한 사실로 바꿔야 규칙이 "어떤 encoding E든"처럼 일반적으로 참조할 수 있습니다. 채널마다 따로 predicate를 두지 않고 `channel(E,C)`로 일반화했기 때문에 detail 채널을 여러 번 쓸 수 있고 채널과 무관한 규칙을 쓰기 쉽습니다. **[§4.1]** 결과 answer set은 다시 Vega-Lite 명세로 바뀝니다. **[§4.3]**
+
+**Q. Draco는 layer, concat, 상호작용도 추천하나요?**
+A. 아니요. 2019 논문은 단일 뷰와 row/column facet만 다룹니다. **[§2.3]** Vega-Lite selection 같은 상호작용은 앞으로 확장할 방향으로만 언급합니다. **[§7.2]**
+
+**Q. 2019 Draco는 Vega-Lite 몇 버전을 썼나요?**
+A. 논문에는 버전이 적혀 있지 않습니다. **[명시 없음]** 다만 2019 Draco Editor는 Vega-Lite v2 스키마를 씁니다(2026-10-11 확인). 발표 사이트의 차트는 현재 버전 Vega-Lite로 그렸고, v2에도 있던 기능만 썼습니다.
+
+**Q. nominal과 ordinal은 왜 구분하나요?**
+A. 순서가 있느냐에 따라 맞는 표현이 다르기 때문입니다. Cylinders(3, 4, 5, 6, 8)는 순서가 있는 ordinal, Origin(Europe, Japan, USA)은 순서가 없는 nominal입니다. type은 Vega-Lite의 기본 scale과 legend를 정하고, Draco 규칙의 조건이 되기도 합니다. 예를 들어 크기(size)는 순서를 느끼게 하므로 nominal 데이터에는 쓰지 않습니다. **[§4.2.1]**
+
+### ASP
+
+**Q. ASP와 Prolog는 뭐가 다른가요?**
+A. 둘 다 논리 프로그래밍이지만 동작이 다릅니다. Prolog는 질의 하나를 규칙 순서대로 위에서 아래로 증명해 나가고, 규칙을 적는 순서가 결과와 종료 여부에 영향을 줍니다. ASP는 프로그램 전체를 변수 없는 형태로 펼친(grounding) 뒤 solver가 조건을 만족하는 answer set을 찾습니다. 규칙 순서와 무관하고, 최적화(weak constraint)가 언어에 들어 있습니다. **[배경]** 논문은 predicate를 `이름/인자 수`로 부르는 Prolog 관례만 언급합니다. **[§4 각주]**
+
+**Q. 왜 ASP를 골랐나요? SAT나 정수계획법, 머신러닝도 있는데요.**
+A. 논문은 잘 정의된 의미론과 효율적인 범용 풀이 알고리즘 **[§1]**, 지식은 선언하고 탐색은 solver에 맡기는 분리 **[§2.4]**, 표현력·효율·사용 편의의 균형 **[§2.4]**을 이유로 듭니다. 머신러닝만으로 추천하려면 "불완전한 명세 → 최적 완성" 쌍이 필요한데, 시각화에서는 하나의 정답이 없어 그런 데이터가 없습니다. 그래서 규칙은 ASP로 쓰고 weight만 순위 쌍으로 학습합니다. **[§2.5]** SAT나 정수계획법과 직접 비교한 실험은 없습니다. **[명시 없음]**
+
+**Q. 규칙의 `not`은 논리의 부정과 같나요?**
+A. 다릅니다. ASP의 `not B`는 "B를 도출할 수 없다"는 뜻입니다(negation as failure). `light_on :- power_on, not broken.`에서 broken을 도출할 근거가 없으면 light_on이 참이 됩니다. **[§3]** 그래서 `:~ continuous(E), not zero(E). [5]`는 "연속형인데 0을 포함한다는 사실이 없으면 비용 5"로 읽습니다.
+
+**Q. answer set이 정확히 뭔가요?**
+A. 규칙과 모순이 없고, 참인 것마다 도출 근거가 있으며, 근거 없는 것은 참이라 하지 않는 최소한의 사실 집합입니다(stable model). **[§3]** Draco에서는 answer set 하나가 완성된 차트 명세 하나입니다.
+
+**Q. Clingo는 모든 후보를 다 만들어 보고 고르나요?**
+A. 아니요. conflict reasoning과 heuristic으로 탐색을 이끌어 수백만 변수 규모도 풉니다. **[§2.4]** 모든 후보를 만든 뒤 검사하는 CompassQL과 대비되는 점이고, 필드 25개·인코딩 5개 질의를 0.5초 안에 풀었는데 CompassQL은 몇 분 뒤 메모리가 부족했습니다. **[§6.2]** 내부적으로 먼저 grounding을 하고, 더 낮은 비용의 해를 찾을 때마다 기준을 낮춰 가며 최적을 증명합니다. **[배경]** 이 내부 알고리즘은 논문에 설명되어 있지 않습니다. **[명시 없음]**
+
+**Q. 최적해가 여러 개(동점)면 어떻게 되나요?**
+A. 논문의 "최적"은 정의된 선호 아래에서 더 선호되는 다른 시각화가 없다는 뜻입니다. **[§4]** 동점일 때 무엇을 고르는지는 적혀 있지 않습니다. **[명시 없음]** 상위 몇 개를 뽑아 다른 분류기로 다시 순위를 매기는 방법은 향후 과제로 제안합니다. **[§7.1]**
+
+**Q. Clingo 비용은 정수인데, 학습한 weight는 실수 아닌가요?**
+A. 논문은 평가 함수가 명세를 정수로 바꾼다고만 하고 **[§4.2.2]**, RankSVM이 학습한 실수 weight를 어떻게 정수로 바꾸는지는 적지 않았습니다. **[명시 없음]** 보통은 일정 배수를 곱해 반올림하는 방식을 쓰지만 이건 일반적인 방법일 뿐 논문 내용이 아닙니다. **[배경]**
+
+**Q. 비용은 weight의 평균인가요?**
+A. 합입니다. Cost(v) = Σ wᵢ · nᵢ(v)이고 nᵢ(v)는 i번째 soft constraint를 위반한 횟수입니다. w와 x = [n₁(v), ..., n_k(v)]는 soft constraint 개수 k차원의 벡터라서 Cost = wᵀx입니다. **[§4.2.2, §5]**
+
+**Q. Draco-APT 규칙의 `[2@P,E]`는 무슨 뜻인가요?**
+A. `w@P`는 비용 w를 우선순위 P 단계에 매긴다는 뜻입니다. solver는 hard constraint를 먼저 모두 지키고, 그다음 soft constraint를 우선순위 단계 순서로 따집니다. Draco-APT는 P에 필드의 중요도를 넣어, 중요한 필드부터 가장 효과적인 채널을 받는 APT의 원칙을 재현합니다. **[§6.1]** 뒤의 `E`는 encoding마다 위반을 따로 센다는 표시입니다. **[배경]** 학습한 weight를 쓰는 Draco-Learn은 단일 비용 합을 씁니다. **[§5]**
+
+**Q. 어떤 규칙을 hard로, 어떤 규칙을 soft로 두나요?**
+A. 차트가 성립하지 않거나(문법 오류) 데이터를 잘못 전달하면 hard, 좋고 나쁨의 정도 차이면 soft입니다. 일부 hard constraint는 "좋은 디자인"이 아니라 Vega-Lite 구현의 한계를 반영합니다(예: shape는 8종까지). **[§4.2.1]**
+
+**Q. 이 발표 사이트의 비용도 Clingo로 계산하나요?**
+A. 아니요. 사이트는 Draco의 비용 모델(위반 횟수 × weight의 합)만 빌려서 TypeScript로 직접 계산합니다. 제약과 weight도 이 사이트를 위해 손으로 정한 값이고, 논문의 지식 베이스가 아닙니다.
 
 ## 개념 간 관계
 

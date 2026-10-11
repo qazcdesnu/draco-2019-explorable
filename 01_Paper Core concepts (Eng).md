@@ -120,6 +120,33 @@ example in Fig. 2 of the paper.
    charts, histograms, dot plots, scatter plots, line graphs, and area
    graphs. Layering, concatenation, and interaction are future work.
 
+### How the presentation site explains it (Part 2, Part 3)
+
+The talk splits Vega-Lite into two steps, as the paper does: Vega-Lite
+itself (§2.3) and its translation into facts (§4.1).
+
+1. **Part 2 "a grammar that declares charts" (§2.3, §4.1):** Vega-Lite
+   only. The demo shows that changing a few JSON lines (mark, fields)
+   changes the chart.
+2. **Part 3 "specifications as facts" (§4.1, Fig. 2):** how the same
+   specification becomes ASP facts.
+
+Data types are easiest to explain with the cars data.
+
+| type | Meaning | cars example | Default rendering |
+|---|---|---|---|
+| nominal | unordered categories | `Origin` (Europe, Japan, USA) | color hues, unordered axis |
+| ordinal | ordered categories | `Cylinders` (3, 4, 5, 6, 8) | ordered band axis |
+| quantitative | numbers | `Horsepower`, `Miles_per_Gallon` | continuous axis; zero baseline set via scale |
+| temporal | time | `Year` | time axis |
+
+- The type sets default scales, axes, and legends, and it is also a
+  condition in Draco's rules. For example, "do not use size for nominal
+  data" (expressiveness, §4.2.1) is decided from the type.
+- In the demo, adding `aggregate: mean` to y when the mark is bar is a
+  **demo design choice** so that each bar shows one value. It is not a
+  Draco rule.
+
 **Note:** some hard constraints encode **limits of the Vega-Lite
 implementation** rather than design quality. For example, Vega-Lite has
 only 8 shapes, hence
@@ -214,6 +241,78 @@ logical rules and constraints. 2. Search for candidate designs
 consistent with the rules. 3. Exclude designs that violate hard
 constraints. 4. Use optimization preferences, such as weighted soft
 constraints, to rank or select designs.
+
+### Syntax and semantics (§3)
+
+| Form | Name | Reading | Example |
+|---|---|---|---|
+| `A.` | fact (bodiless rule) | A is true | `mark(bar).` |
+| `A :- L1, ..., Ln.` | rule | if every body literal is true, the head A is true | `light_on :- power_on, not broken.` |
+| `not B` | negation as failure | B **cannot be derived** (not "B is proven false") | `not zero(E)` |
+| `:- L1, ..., Ln.` | integrity constraint (headless rule, hard constraint) | if the body holds, contradiction; discard that answer set | `:- log(E), zero(E).` |
+| `:~ L1, ..., Ln. [w]` | weak constraint (soft constraint) | each time the body holds, cost w; "prefer not to" | `:~ continuous(E), not zero(E). [5]` |
+| `:~ L1, ..., Ln. [w@P,T]` | weak constraint with priority | cost w at priority level P; T is what each violation is counted per | `:~ type(E,nominal), channel(E,color), priority(E,P). [2@P,E]` |
+| `l { A0; ...; An } k` | aggregate (choice) rule | at least l and at most k of the atoms are true | `1 { mark(bar); mark(line); mark(area); mark(point) } 1.` |
+
+- **Variables** start with an uppercase letter (`E`, `C`).
+  `0 { aggregate(E,count); aggregate(E,mean); ... } 1 :- encoding(E).`
+  means "every encoding E has at most one aggregate" (§4.2.1).
+- **Predicate notation:** following Prolog tradition, predicates are
+  named by name and arity; `channel/2` is `channel` with two arguments
+  (§4 footnote).
+- **Answer set (stable model):** a set of atoms that is consistent with
+  the constraints, justified by a derivation, and **minimal** with
+  respect to unknown facts (§3). In Draco, one answer set is one
+  complete visualization specification.
+- **Constructive flavor:** a negative literal only needs to be true
+  ("not derived"), whereas a positive one must also be provable (§3).
+- **Optimal answer set:** with soft constraints, the optimal answer set
+  minimizes the sum of weights of violated soft constraints (§3). ASP
+  can express richer optimization such as Pareto optimality, but the
+  paper says the weighted sum suffices for the linear preference models
+  it learns.
+
+### How Draco uses ASP (§4)
+
+1. **Domains:** aggregate rules declare the values each attribute can
+   take (which marks, which aggregates, ...). Supporting tick marks means
+   adding `mark(tick)`.
+2. **Pruning the design space:** integrity constraints remove
+   ill-formed specifications (well-formedness) and ones that misrepresent
+   data (expressiveness). Some reflect limits of the Vega-Lite
+   implementation.
+3. **Preferences:** soft constraints define the evaluation function
+   **implicitly**. Costs are integers and impose a total order on the
+   design space (§4.2.2).
+4. **Query and solve:** the user's data, partial specification, and task
+   become facts and rules, are combined with the knowledge base, and
+   Clingo finds the optimal answer set, which Draco translates back into
+   a Vega-Lite specification (§4.3).
+5. **Features for learning:** running Clingo on a complete specification
+   and counting each soft constraint's violations gives its feature
+   vector x (§5).
+
+### Clingo
+
+- The solver used by the 2019 Draco. It uses conflict reasoning and
+  heuristics to guide search and solves problems with up to millions of
+  variables (§2.4).
+- The paper does not describe Clingo's internal optimization algorithm;
+  it points to the Potassco Clingo guide for the language and solver.
+
+### Why ASP (the paper's reasons)
+
+- **Well-defined semantics and efficient domain-independent algorithms**
+  (§1): finding good encodings becomes finding optimal answer sets.
+- **Separating knowledge from search** (§2.4, §4): designers declare
+  knowledge and leave search to the solver. Imperative generate-and-test
+  systems such as CompassQL waste resources enumerating infeasible
+  candidates and are hard to change.
+- **Balance of expressivity, efficiency, and ease of use** (§2.4), with
+  prior use in decision support, product configuration, and educational
+  game design.
+- **Fits the learning step:** cost is linear in violation counts, so
+  weights learned by RankSVM plug straight in (§5).
 
 **Important distinction:** ASP provides the rule-based reasoning and
 solution-search mechanism. Learning soft-constraint weights from
@@ -314,6 +413,139 @@ accurate than chart B (nominal → size).
 **Role in Draco:** ASP finds the best design for given weights; learning
 to rank sets those weights from experimental data. Because cost is a
 linear function of the feature vector, the two fit together cleanly.
+
+## 6. Preparing for questions after the talk: Vega-Lite and ASP
+
+Source tags: **[paper §]** = supported by the paper, **[background]** =
+general knowledge outside the paper (say so when answering),
+**[unstated]** = the paper does not say (do not fill it in by guessing).
+
+### Vega-Lite
+
+**Q. How is Vega-Lite different from Vega or D3?**
+A. D3 is a JavaScript library where code spells out how to draw. Vega is
+a declarative grammar above that, and Vega-Lite is a higher-level grammar
+above Vega; Vega-Lite specifications compile to Vega. **[background]**
+In the Draco paper, Vega-Lite is both what Draco reasons about and its
+output language. **[§2.3, Fig. 1]**
+
+**Q. Why Vega-Lite and not ggplot2 or Tableau?**
+A. The paper gives three reasons: Vega-Lite was designed to support
+search and inference over possible visualizations **[§2.3]**; CompassQL
+already used a logical representation of Vega-Lite **[§2.3]**; and APT's
+graphical algebra is no longer used, while Vega-Lite is a more complete
+graphical language **[§2.1]**. Its JSON format is also easy for programs
+to generate and edit. **[background]**
+
+**Q. Why convert JSON into facts instead of using it directly?**
+A. An ASP solver reasons only over facts and rules. Flattening nested
+JSON into facts like `mark(bar).` and `channel(e0,x).` lets rules refer
+generally to "any encoding E". Generalizing to `channel(E,C)` instead of
+one predicate per channel allows the detail channel to be used several
+times and makes channel-independent rules easy to write. **[§4.1]** The
+resulting answer set is translated back into Vega-Lite. **[§4.3]**
+
+**Q. Does Draco recommend layers, concatenation, or interaction?**
+A. No. The 2019 paper covers single views and row/column facets only.
+**[§2.3]** Interaction such as Vega-Lite selections is mentioned only as
+a future extension. **[§7.2]**
+
+**Q. Which Vega-Lite version did the 2019 Draco use?**
+A. The paper does not say. **[unstated]** The 2019 Draco Editor uses the
+Vega-Lite v2 schema (checked 2026-10-11). The presentation site renders
+with the current Vega-Lite and uses only features that existed in v2.
+
+**Q. Why distinguish nominal from ordinal?**
+A. Whether values have an order changes which encodings fit. Cylinders
+(3, 4, 5, 6, 8) is ordinal; Origin (Europe, Japan, USA) is nominal. The
+type sets Vega-Lite's default scales and legends and is a condition in
+Draco's rules. For example, size implies an order, so it is not used for
+nominal data. **[§4.2.1]**
+
+### ASP
+
+**Q. How is ASP different from Prolog?**
+A. Both are logic programming, but they run differently. Prolog proves
+one query top-down in rule order, and rule order affects results and
+termination. ASP first grounds the whole program (removes variables) and
+then a solver searches for answer sets; rule order does not matter, and
+optimization (weak constraints) is part of the language.
+**[background]** The paper mentions only the Prolog convention of naming
+predicates by name/arity. **[§4 footnote]**
+
+**Q. Why ASP and not SAT, integer programming, or machine learning?**
+A. The paper cites well-defined semantics and efficient
+domain-independent algorithms **[§1]**, separating declared knowledge
+from solver search **[§2.4]**, and a balance of expressivity, efficiency,
+and ease of use **[§2.4]**. Pure machine learning would need pairs of
+incomplete specifications and optimal completions, which do not exist
+for visualization because there is no single correct answer; so the
+rules are written in ASP and only the weights are learned from ranked
+pairs. **[§2.5]** There is no experimental comparison with SAT or integer
+programming. **[unstated]**
+
+**Q. Is `not` in a rule the same as logical negation?**
+A. No. In ASP, `not B` means "B cannot be derived" (negation as failure).
+In `light_on :- power_on, not broken.`, light_on holds if there is no
+derivation of broken. **[§3]** So `:~ continuous(E), not zero(E). [5]`
+reads "cost 5 if a field is continuous and there is no fact saying its
+scale includes zero".
+
+**Q. What exactly is an answer set?**
+A. A minimal set of facts that is consistent with the rules, in which
+every true atom has a derivation and nothing unjustified is assumed true
+(a stable model). **[§3]** In Draco, one answer set is one complete chart
+specification.
+
+**Q. Does Clingo generate every candidate and then pick one?**
+A. No. It uses conflict reasoning and heuristics to guide search and
+handles problems with millions of variables. **[§2.4]** This contrasts
+with CompassQL's generate-and-test: Draco answered a 25-field,
+5-encoding query in under 0.5 s, while CompassQL ran out of memory after
+minutes. **[§6.2]** Internally it grounds the program and then keeps
+finding cheaper solutions, tightening the bound until it proves
+optimality. **[background]** The paper does not describe this algorithm.
+**[unstated]**
+
+**Q. What if several answers tie for optimal?**
+A. In the paper, "optimal" means no other visualization would be scored
+as preferred under the defined preferences. **[§4]** How ties are broken
+is not stated. **[unstated]** Enumerating top-scoring designs and
+re-ranking them with another classifier is proposed as future work.
+**[§7.1]**
+
+**Q. Clingo costs are integers, but aren't learned weights real numbers?**
+A. The paper says only that the evaluation function maps a specification
+to an integer **[§4.2.2]**; it does not say how RankSVM's real-valued
+weights are turned into integers. **[unstated]** Scaling and rounding is
+the usual approach, but that is general practice, not the paper.
+**[background]**
+
+**Q. Is the cost an average of weights?**
+A. It is a sum: Cost(v) = Σ wᵢ · nᵢ(v), where nᵢ(v) counts violations of
+the i-th soft constraint. Both w and x = [n₁(v), ..., n_k(v)] are
+k-dimensional (k = number of soft constraints), so Cost = wᵀx.
+**[§4.2.2, §5]**
+
+**Q. What does `[2@P,E]` mean in the Draco-APT rules?**
+A. `w@P` assigns cost w at priority level P. The solver first satisfies
+all hard constraints and then considers soft constraints level by level.
+Draco-APT sets P to the field's importance, reproducing APT's principle
+that more important fields get the more effective channels. **[§6.1]**
+The trailing `E` makes violations count separately per encoding.
+**[background]** Draco-Learn, with learned weights, uses a single
+weighted sum. **[§5]**
+
+**Q. How do you decide whether a rule is hard or soft?**
+A. If violating it makes the chart invalid (ungrammatical) or misleading,
+it is hard; if it is a matter of degree, it is soft. Some hard
+constraints reflect limits of the Vega-Lite implementation rather than
+design quality (e.g., at most 8 shapes). **[§4.2.1]**
+
+**Q. Does this presentation site compute its costs with Clingo?**
+A. No. The site borrows only Draco's cost model (sum of violation count ×
+weight) and computes it directly in TypeScript. Its constraints and
+weights are hand-tuned for the site, not the paper's knowledge base.
 
 ## Concept map
 
