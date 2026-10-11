@@ -1,5 +1,7 @@
 # 5단계: 빌드와 배포 전략
 
+**운영 주소:** https://draco-2019-explorable.vercel.app
+
 ## 결정
 
 - **정적 사이트로 배포한다.** 모든 데모가 브라우저에서 돌고 데이터(`cars.json`)도 번들되어 있어 서버가 필요 없다. 그래서 FastAPI/Render는 쓰지 않는다. `backend/`는 비워 둔 채 유지한다.
@@ -66,3 +68,4 @@ cd /tmp/draco-check/frontend && npm ci && npm run build && npm run preview
 | 날짜 | 내용 | 주소 |
 |---|---|---|
 | 2026-10-11 | 로컬 clean clone에서 `npm ci` + `npm run build` 통과 (Node 20.19.5, Vite 8.3.4) | |
+| 2026-10-11 | Vercel 연결, 첫 운영 배포. 이후 `main` push(60442fc까지)가 자동 반영됨을 확인. 페이지, `data/cars.json`, `THIRD_PARTY_LICENSES.txt` 모두 200. `/assets/*`는 `immutable`, `index.html`은 `max-age=0, must-revalidate`. 세 보기, 다크 모드, 모바일(390px)에서 콘솔 에러·가로 스크롤 없음 | https://draco-2019-explorable.vercel.app |

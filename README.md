@@ -2,6 +2,8 @@
 
 An explorable explanation of Draco (Moritz et al., IEEE InfoVis 2019): visualization design knowledge as constraints.
 
+**사이트:** https://draco-2019-explorable.vercel.app
+
 데이터사이언스를 위한 시각화 수업의 논문 리뷰 발표를 웹사이트로 만든 것입니다. 같은 내용을 세 가지 보기(Paper, Deck, Explorer)로 보여 주고, 각 보기를 Draco의 비용 모델로 평가합니다. 각 보기가 위반한 soft constraint의 weight 합이 비용입니다(weight는 이 사이트용으로 정한 값).
 
 ## 리뷰 대상 논문

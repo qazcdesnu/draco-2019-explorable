@@ -58,4 +58,4 @@ The site applies Draco's own idea to itself. Three **views** (Paper / Deck / Exp
 
 - The vault path contains spaces and parentheses (`01_Draco(InfoVis)`); always quote paths in shell commands.
 - Git repo on `main`; commit author is set locally (`git config user.name/user.email`), not globally. Vercel deploys from the GitHub remote.
-- Deploy: Vercel project with Root Directory `frontend`; settings in `frontend/vercel.json`. Every push to `main` redeploys production. See `docs/05_deploy.md`.
+- Deploy: https://draco-2019-explorable.vercel.app. Vercel project with Root Directory `frontend`; settings in `frontend/vercel.json`. Every push to `main` redeploys production. See `docs/05_deploy.md`.

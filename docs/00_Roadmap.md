@@ -11,7 +11,7 @@
 | 2 | Draco 컨셉에 맞는 웹 디자인 결정 | `docs/02_design.md` | 1차 완료 (권장안 채택) |
 | 3 | 리뷰 순서, 목차, 파트 배열 | `docs/03_outline.md` | 1차 완료 |
 | 4 | 문서 기반으로 웹사이트 구현 | `frontend/src/` | 1차 결과물 완성 (피드백 대기) |
-| 5 | 빌드, 배포 전략 문서화 후 직접 배포 | `docs/05_deploy.md` | 문서 완료, Vercel 연결 진행 중 |
+| 5 | 빌드, 배포 전략 문서화 후 직접 배포 | `docs/05_deploy.md` | 완료 (https://draco-2019-explorable.vercel.app) |
 | 6 | 내용 보강 (개선 요청 → 검토 → 승인 → 반영) | `docs/06_improvements.md`, 대본 `docs/07_script.md` | 진행 중 (IMP-001, 002 반영 완료) |
 
 ## 1단계 문서 (`docs/01_paper/`)
