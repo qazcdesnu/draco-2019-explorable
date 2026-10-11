@@ -152,27 +152,6 @@ implementation** rather than design quality. For example, Vega-Lite has
 only 8 shapes, hence
 `:- channel(E,shape), cardinality(E,C), C > 8.`
 
-## 3. Soft constraints
-
-**Definition:** A soft constraint expresses a preference that should
-ideally be satisfied but may be violated when necessary. Violations
-incur a cost or penalty, allowing a system to compare trade-offs among
-designs.
-
-A simplified objective is:
-
-`Total cost = Σᵢ wᵢ vᵢ`
-
-- `wᵢ`: weight associated with constraint i.
-- `vᵢ`: violation indicator or cost for constraint i.
-
-Lower total cost indicates a design that better satisfies the weighted
-preferences, assuming the system minimizes this objective.
-
-**In Draco:** Soft-constraint weights represent the relative importance
-of design preferences. The paper also explores learning weights from
-experimental data, including graphical-perception experiments.
-
 ## 3. Soft and hard constraints
 
 Draco represents visualization-design knowledge as constraints. The key
