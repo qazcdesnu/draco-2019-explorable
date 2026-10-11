@@ -16,6 +16,7 @@ The work proceeds in documented stages tracked in `docs/00_Roadmap.md` (read it 
 3. Review order / table of contents → `docs/03_outline.md`
 4. Build the site in `frontend/` from those docs
 5. Build and deploy strategy → `docs/05_deploy.md`, then deploy (Vercel)
+6. Content improvement → `docs/06_improvements.md`. Each request gets an `IMP-NNN` entry and one review direction: A add a part, B edit content, C presentation script only (`docs/07_script.md`), D no change. Record the review, get approval, then apply. Refer to parts by Part number (Deck slide number = Part + 1).
 
 **Scope rule:** the review covers only the 2019 Draco described in this paper. Never present later work (Draco 2, the current Draco repo or docs, newer Vega-Lite features) as if it were part of the reviewed Draco. Later work may appear only in a clearly labeled "after this paper" mention. Implementation details the paper does not state must be marked as unstated, not filled in from other versions.
 
