@@ -8,6 +8,7 @@ import { Pipeline } from '../demos/Pipeline'
 import { RankDemo } from '../demos/RankDemo'
 import { PairHarvest } from '../demos/PairHarvest'
 import { EvidenceDemo } from '../demos/Evidence'
+import { SiteQR } from '../components/SiteQR'
 
 // 모든 보기(Paper / Deck / Explorer)가 공유하는 단일 콘텐츠 원본 (docs/03_outline.md)
 // kind: paper = 논문 내용, review = 우리의 평가
@@ -44,6 +45,7 @@ export const SECTIONS: Section[] = [
         <p>이 리뷰는 2019년 논문에 실린 Draco만 다룹니다. 이후 버전은 마지막 파트의 "리뷰 범위 밖" 칸에서만 언급합니다.</p>
       </>
     ),
+    Demo: SiteQR,
   },
   {
     id: 'problem',
